@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="{{url_for('static',filename='dist/output.css')}}">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
         <!-- DM Serif Display from Google Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -11,13 +12,139 @@
         <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&display=swap" rel="stylesheet">
 
         <style>
+         
             .dm-serif { font-family: 'DM Serif Display', serif; }
-        </style>
+            input.no-spin::-webkit-outer-spin-button,
+            input.no-spin::-webkit-inner-spin-button {
+                -webkit-appearance: none;
+                margin: 0;
+            }
 
+            input.no-spin[type=number] {
+                -moz-appearance: textfield;
+            }
+        </style>
         <title>Welcome to Prioriti</title>
 </head>
 <body class="flex flex-col gap-3 justify-center items-center bg-[#fadfc0] p-10">
     <h1 class="text-4xl font-semibold dm-serif">Welcome to Prioriti!</h1>
     <p class="text-xl font-light font-sans">Your task management solution.</p>
+
+
+    <!--- Timer Inputs -->
+    <div class="flex text-center justify-center text-7xl dm-serif items-center">
+    <input id="minutesInput" class="w-20 text-center border rounded border-none no-spin" type="number" value="25" min="0">
+    <span>:</span>
+    <input id="secondsInput" class="w-20 text-center border rounded border-none no-spin" type="number" value="00" min="0" max="59">
+    </div>
+
+     <!--- Button Row -->
+    <div class="flex gap-2"> 
+        <button id="toggleBtn" class="p-2 hover:text-amber-800 transition-colors ease-in-out text-black text-2xl rounded"> <i class="fa-solid fa-play" id="toggleIcon"></i></button>
+
+        <button id="resetBtn" class="p-2  text-black hover:text-amber-800 transition-colors ease-in-out text-2xl rounded"> <i class="fa-solid fa-rotate-right"></i></button>
+    </div>
 </body>
+
+<script> 
+    // Getting references to all elements
+    let interval = null; 
+    let timeLeft = 0;
+    const minInput = document.getElementById("minutesInput");
+    const secInput = document.getElementById("secondsInput");
+    const toggleIcon = document.getElementById("toggleIcon");
+    const toggleBtn = document.getElementById("toggleBtn");
+    const resetBtn = document.getElementById("resetBtn");
+
+
+    minInput.addEventListener("focus", stopTimer);
+    secInput.addEventListener("focus", stopTimer);
+
+    // Function to start the timer
+    function startTimer() {
+        // Remove focus from inputs to prevent further editing
+        minInput.blur();
+        secInput.blur();
+
+        // Get the time from inputs
+        let minutes = parseInt(minInput.value) || 0;
+        let seconds = parseInt(secInput.value) || 0;
+
+        if (minutes < 0 || seconds < 0 || seconds > 59) return;
+        
+        // calculate time left in seconds 
+        timeLeft = minutes * 60 + seconds;
+
+        if (interval) clearInterval(interval);
+
+        // Initial update
+        updateInputs(timeLeft);
+
+        // Start the countdown
+        interval = setInterval(() => {
+            timeLeft--;
+            
+            // When time is up, reset the timer back to default (25 mins)
+            if (timeLeft <= 0) {    
+                clearInterval(interval);
+                minInput.value = "25";
+                secInput.value = "00";
+                toggleIcon.className = "fa-solid fa-play";
+                return;
+            }
+            updateInputs(timeLeft);
+        }, 1000);
+
+        toggleIcon.className = "fa-solid fa-pause";
+    }
+
+    // Function to update input fields based on total seconds left
+    function updateInputs(totalSeconds) {
+        const m = Math.floor(totalSeconds / 60);
+        const s = totalSeconds % 60;
+
+        minInput.value = String(m).padStart(2,'0');
+        secInput.value = String(s).padStart(2,'0');
+    }
+    // Function to stop the timer (keeps progress intact)
+    function stopTimer() {
+        if (interval) {
+            clearInterval(interval); 
+            interval = null;
+            toggleIcon.className = "fa-solid fa-play";
+        }
+    }
+
+    // Function to reset the timer to default (25 mins)
+    function resetTimer() {
+        stopTimer();
+        minInput.value = "25";
+        secInput.value = "00";
+        timeLeft = 1500; 
+
+    }
+    // Event listeners for buttons
+    toggleBtn.addEventListener("click", () => {
+        if (timeLeft == 0) {
+            const minutes = parseInt(minInput.value) || 0;
+            const seconds = parseInt(secInput.value) || 0;
+            timeLeft = minutes * 60 + seconds; 
+            if (timeLeft <= 0) {
+                return; 
+            }
+            toggleIcon.className = "fa-solid fa-play";
+            
+        }
+        if (interval) {
+            stopTimer();
+        } else {
+            startTimer();
+        }
+    });
+
+    // Reset button event listener
+    resetBtn.addEventListener("click", resetTimer);
+
+</script>
+
 </html>
