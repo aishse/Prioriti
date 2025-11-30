@@ -23,127 +23,204 @@
             input.no-spin[type=number] {
                 -moz-appearance: textfield;
             }
+            
+            #settings {
+                max-height: 0;
+                opacity: 0;
+                overflow: hidden;
+                padding-top: 0;
+                padding-bottom: 0;
+                transition: max-height 0.4s ease-in-out, opacity 0.4s ease-in-out, padding 0.4s ease-in-out;
+            }
+            
+            #settings.show {
+                max-height: 500px;
+                opacity: 1;
+                padding-top: 1rem;
+                padding-bottom: 1rem;
+            }
+            
+            #settings.hidden {
+                display: none;
+            }
+            
+            #settingsIcon {
+                transition: transform 0.4s ease-in-out;
+            }
+            
+            /* Ensure settings container doesn't affect layout */
+            #settingsContainer {
+                position: fixed;
+                top: 1rem;
+                left: 1rem;
+            }
         </style>
         <title>Welcome to Prioriti</title>
 </head>
-<body class="flex flex-col gap-3 justify-center items-center bg-[#fadfc0] p-10">
+<body class=" bg-[#fadfc0] p-10">
+     <!-- Settings Dropdown -->
+    <div id="settingsContainer" class="fixed top-4 left-4 w-64" style="z-index: 9999;">
+        <button id="settingsToggle" class="w-full flex justify-between items-center p-3 gap-2 rounded-lg shadow-md hover:bg-amber-50 transition-colors ease-in-out">
+            <span class="font-semibold text-amber-950">Settings</span>
+            <i id="settingsIcon" class="fa-solid fa-chevron-down transition-transform duration-300"></i>
+        </button>
+        <div id="settings" class="absolute top-full left-0 mt-2 w-full bg-white rounded-lg shadow-md hidden" style="z-index: 9999;">
+            <!-- Enter custom times for pomomdoro timer -->
+            <div class="w-full p-4">
+                <div class="grid grid-cols-2 gap-2 items-center">
+                    <label for="workInput" class="text-right pr-2">Work duration:</label>
+                    <input id="workInput" class="w-20 text-center border rounded" 
+                        type="number" value="{{ settings.work }}">
+                    <label for="smallBreakInput" class="text-right pr-2">Small break duration:</label>
+                    <input id="smallBreakInput" class="w-20 text-center border rounded no-spin" type="number" value="{{ settings.small_break }}">
+
+                    <label for="longBreakInput" class="text-right pr-2">Long break duration:</label>
+                    <input id="longBreakInput" class="w-20 text-center border rounded no-spin" type="number" value="{{ settings.long_break }}">
+                </div>
+
+                <div class="flex flex-col gap-2 mt-4">
+                    <button id="setCustomDurationsBtn" class="p-2 text-white bg-amber-950 hover:bg-amber-800 transition-colors ease-in-out text-md rounded">Set</button>
+                    <button id="resetDefault" class="p-2 text-white bg-amber-950 hover:bg-amber-800 transition-colors ease-in-out text-md rounded">Reset</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="flex flex-col gap-3 justify-center items-center">
     <h1 class="text-4xl font-semibold dm-serif">Welcome to Prioriti!</h1>
     <p class="text-xl font-light font-sans">Your task management solution.</p>
 
-
+   
     <!--- Timer Inputs -->
     <div class="flex text-center justify-center text-7xl dm-serif items-center">
+    <button id="stateBack" class="p-2 hover:text-amber-800 transition-colors ease-in-out text-black text-2xl rounded"> <i class="fa-solid fa-angle-left"></i></button>
+
     <input id="minutesInput" class="w-20 text-center border rounded border-none no-spin" type="number" value="25" min="0">
     <span>:</span>
     <input id="secondsInput" class="w-20 text-center border rounded border-none no-spin" type="number" value="00" min="0" max="59">
-    </div>
+    <button id="stateForward" class="p-2 hover:text-amber-800 transition-colors ease-in-out text-black text-2xl rounded"> <i class="fa-solid fa-angle-right"></i></button>
 
+    </div>
+    <h1 id="stateLabel"></h1>
+    
      <!--- Button Row -->
     <div class="flex gap-2"> 
-        <button id="toggleBtn" class="p-2 hover:text-amber-800 transition-colors ease-in-out text-black text-2xl rounded"> <i class="fa-solid fa-play" id="toggleIcon"></i></button>
+        <button id="toggleBtn" class="p-2 hover:text-amber-800 transition-colors ease-in-out text-black text-2xl rounded"> <i id="toggleIcon" class="fa-solid fa-play"></i></button>
 
         <button id="resetBtn" class="p-2  text-black hover:text-amber-800 transition-colors ease-in-out text-2xl rounded"> <i class="fa-solid fa-rotate-right"></i></button>
     </div>
+    </div>
+   
 </body>
 
 <script> 
-    // Getting references to all elements
-    let interval = null; 
-    let timeLeft = 0;
+
     const minInput = document.getElementById("minutesInput");
     const secInput = document.getElementById("secondsInput");
     const toggleIcon = document.getElementById("toggleIcon");
     const toggleBtn = document.getElementById("toggleBtn");
     const resetBtn = document.getElementById("resetBtn");
+    const stateField = document.getElementById("stateLabel");
+    const stateBackBtn = document.getElementById("stateBack");
+    const stateForwardBtn = document.getElementById("stateForward");
+    const resetDefaultBtn = document.getElementById("resetDefault");
 
+    const workInput = document.getElementById("workInput");
+    const smallBreakInput = document.getElementById("smallBreakInput");
+    const longBreakInput = document.getElementById("longBreakInput");
+    const setCustomDurationsBtn = document.getElementById("setCustomDurationsBtn");
+    const settingsToggle = document.getElementById("settingsToggle");
+    const settingsPanel = document.getElementById("settings");
+    const settingsIcon = document.getElementById("settingsIcon");
 
-    minInput.addEventListener("focus", stopTimer);
-    secInput.addEventListener("focus", stopTimer);
-
-    // Function to start the timer
-    function startTimer() {
-        // Remove focus from inputs to prevent further editing
-        minInput.blur();
-        secInput.blur();
-
-        // Get the time from inputs
-        let minutes = parseInt(minInput.value) || 0;
-        let seconds = parseInt(secInput.value) || 0;
-
-        if (minutes < 0 || seconds < 0 || seconds > 59) return;
-        
-        // calculate time left in seconds 
-        timeLeft = minutes * 60 + seconds;
-
-        if (interval) clearInterval(interval);
-
-        // Initial update
-        updateInputs(timeLeft);
-
-        // Start the countdown
-        interval = setInterval(() => {
-            timeLeft--;
-            
-            // When time is up, reset the timer back to default (25 mins)
-            if (timeLeft <= 0) {    
-                clearInterval(interval);
-                minInput.value = "25";
-                secInput.value = "00";
-                toggleIcon.className = "fa-solid fa-play";
-                return;
-            }
-            updateInputs(timeLeft);
-        }, 1000);
-
-        toggleIcon.className = "fa-solid fa-pause";
+    async function fetchState() {
+        const res = await fetch("/get_state");
+        const data = await res.json();
+        minInput.value = String(data.minutes).padStart(2, "0");
+        secInput.value = String(data.seconds).padStart(2, "0");
+        stateField.textContent = data.stateLabel;
+        toggleIcon.className = data.running ? "fa-solid fa-pause" : "fa-solid fa-play";
     }
 
-    // Function to update input fields based on total seconds left
-    function updateInputs(totalSeconds) {
-        const m = Math.floor(totalSeconds / 60);
-        const s = totalSeconds % 60;
+    fetchState();
+    setInterval(fetchState, 1000);
 
-        minInput.value = String(m).padStart(2,'0');
-        secInput.value = String(s).padStart(2,'0');
-    }
-    // Function to stop the timer (keeps progress intact)
-    function stopTimer() {
-        if (interval) {
-            clearInterval(interval); 
-            interval = null;
-            toggleIcon.className = "fa-solid fa-play";
-        }
-    }
-
-    // Function to reset the timer to default (25 mins)
-    function resetTimer() {
-        stopTimer();
-        minInput.value = "25";
-        secInput.value = "00";
-        timeLeft = 1500; 
-
-    }
-    // Event listeners for buttons
-    toggleBtn.addEventListener("click", () => {
-        if (timeLeft == 0) {
-            const minutes = parseInt(minInput.value) || 0;
-            const seconds = parseInt(secInput.value) || 0;
-            timeLeft = minutes * 60 + seconds; 
-            if (timeLeft <= 0) {
-                return; 
-            }
-            toggleIcon.className = "fa-solid fa-play";
-            
-        }
-        if (interval) {
-            stopTimer();
-        } else {
-            startTimer();
-        }
+    toggleBtn.addEventListener("click", async() => {
+        await fetch("/toggle_timer", { method: "POST" });
+        fetchState();
+    })
+    
+    resetBtn.addEventListener("click", async () => {
+        await fetch("/reset_timer", { method: "POST" });
+        const state = await fetch("/get_state").then(res => res.json());
+        minInput.value = String(state.minutes).padStart(2, "0");
+        secInput.value = String(state.seconds).padStart(2, "0");
+        stateField.textContent = state.stateLabel;
+        toggleIcon.className = state.running ? "fa-solid fa-pause" : "fa-solid fa-play";
+    
     });
 
-    // Reset button event listener
-    resetBtn.addEventListener("click", resetTimer);
+    stateForwardBtn.addEventListener("click", async () => {
+        await fetch("/next_state", { method: "POST" });
+        fetchState();
+    });
+
+    stateBackBtn.addEventListener("click", async () => {
+        await fetch("/prev_state", { method: "POST" });
+        fetchState();
+    });
+
+    resetDefaultBtn.addEventListener("click", async () => {
+        const response = await fetch("/reset_durations", { method: "POST" });
+        const data = await response.json();
+        workInput.value = data.work;
+        smallBreakInput.value = data.small_break;
+        longBreakInput.value = data.long_break;
+        fetchState();
+    });
+
+    settingsToggle.addEventListener("click", async () => {
+        const isHidden = settingsPanel.classList.contains("hidden");
+        if (isHidden) {
+            
+            settingsPanel.classList.remove("hidden");
+          
+            void settingsPanel.offsetHeight;
+            settingsPanel.classList.add("show");
+            settingsIcon.style.transform = "rotate(180deg)";
+        } else {
+        
+            settingsPanel.classList.remove("show");
+            settingsIcon.style.transform = "rotate(0deg)";
+            setTimeout(() => {
+                settingsPanel.classList.add("hidden");
+            }, 400);
+        }
+    });
+    
+    setCustomDurationsBtn.addEventListener("click", async() => {
+        const work = workInput.value.trim() !== "" ? parseInt(workInput.value) : null;
+        const smallBreak = smallBreakInput.value.trim() !== "" ? parseInt(smallBreakInput.value) : null;
+        const longBreak = longBreakInput.value.trim() !== "" ? parseInt(longBreakInput.value) : null;
+
+        // Only send valid numbers (not NaN)
+        const payload = {};
+        if (work !== null && !isNaN(work) && work > 0) {
+            payload.work = work;
+        }
+        if (smallBreak !== null && !isNaN(smallBreak) && smallBreak > 0) {
+            payload.small_break = smallBreak;
+        }
+        if (longBreak !== null && !isNaN(longBreak) && longBreak > 0) {
+            payload.long_break = longBreak;
+        }
+
+        await fetch("/update_durations", {
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify(payload)
+        });
+        fetchState();
+    });
 
 </script>
 
