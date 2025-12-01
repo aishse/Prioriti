@@ -1,10 +1,13 @@
 from flask import Flask, Response, jsonify, render_template, request, stream_with_context
 from models.pomodoro import PomodoroTimer
+from models.task_manager import TaskManager
+from models.task import Task
 import signal
 import sys
 import time
 app = Flask(__name__) 
 timer = PomodoroTimer()
+task_manager = TaskManager()
 
 def cleanup_on_exit(signum, frame):
     """Clean up resources and exit gracefully"""
@@ -84,3 +87,39 @@ if __name__ == '__main__':
     finally:
         # Ensure timer is stopped
         timer.stop()
+
+
+@app.route("/add_task", methods=["POST"])
+def add_task():
+    data = request.json
+    title = data.get("title")
+    priority = data.get("priority", "Medium")
+    due = data.get("due")
+
+    task_manager.add_task(title, priority, due)
+    return {"status": "ok"}
+
+@app.route("/tasks")
+def list_tasks():
+    return {"tasks": [T.to_dict() for T in task_manager.show_all_tasks()]}
+
+@app.route("/sort_priority")
+def sort_priority():
+    task_manager.sort_priority()
+    return {"status": "sorted"}
+
+@app.route("/complete_task", methods=["POST"])
+def complete_task():
+    data = request.json
+    title = data.get("title")
+    task_manager.mark_complete(title)
+    return {"status": "completed"}
+
+@app.route("/delete_task", methods=["POST"])
+def delete_task():
+    data = request.json
+    title = data.get("title")
+    task_manager.delete_task(title)
+    return {"status": "deleted"}
+
+
