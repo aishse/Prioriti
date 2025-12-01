@@ -1,5 +1,5 @@
 from models.task import Task
-
+from datetime import date
 class TaskManager:
     def __init__(self):
         self.tasks = []
@@ -18,7 +18,11 @@ class TaskManager:
     def sort_priority(self):
         priority_stake = {'High': 3, 'Medium': 2, 'Low': 1}
         self.tasks.sort(key=lambda T: priority_stake[T.priority], reverse=True)
-
+        
+    def sort_date(self): 
+        self.tasks.sort(key=lambda T: T.due_date or date.max)
+    
+    
     def sort_by_due_date(self):
         self.tasks.sort(key=lambda T: T.due_date or '')
 

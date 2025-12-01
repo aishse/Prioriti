@@ -77,26 +77,15 @@ def next_state():
 def get_state():
     return jsonify(timer.get_state())
 
-if __name__ == '__main__':
-    try:
-        app.run(debug=True)
-    except KeyboardInterrupt:
-        print("\nShutting down server...")
-        timer.stop()
-        exit(0)
-    finally:
-        # Ensure timer is stopped
-        timer.stop()
-
 
 @app.route("/add_task", methods=["POST"])
 def add_task():
     data = request.json
     title = data.get("title")
     priority = data.get("priority", "Medium")
-    due = data.get("due")
+    due_date = data.get("due_date")
 
-    task_manager.add_task(title, priority, due)
+    task_manager.add_task(title, priority, due_date)
     return {"status": "ok"}
 
 @app.route("/tasks")
@@ -107,6 +96,12 @@ def list_tasks():
 def sort_priority():
     task_manager.sort_priority()
     return {"status": "sorted"}
+
+@app.route("/sort_due_date")
+def sort_due_date():
+    task_manager.sort_by_due_date()
+    return {"status": "sorted"}
+
 
 @app.route("/complete_task", methods=["POST"])
 def complete_task():
@@ -123,3 +118,13 @@ def delete_task():
     return {"status": "deleted"}
 
 
+if __name__ == '__main__':
+    try:
+        app.run(host="127.0.0.1", port=5001, debug=True, use_reloader=False)
+    except KeyboardInterrupt:
+        print("\nShutting down server...")
+        timer.stop()
+        exit(0)
+    finally:
+        # Ensure timer is stopped
+        timer.stop()

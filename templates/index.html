@@ -24,69 +24,42 @@
                 -moz-appearance: textfield;
             }
             
-            #settings {
-                max-height: 0;
-                opacity: 0;
-                overflow: hidden;
-                padding-top: 0;
-                padding-bottom: 0;
-                transition: max-height 0.4s ease-in-out, opacity 0.4s ease-in-out, padding 0.4s ease-in-out;
-            }
-            
-            #settings.show {
-                max-height: 500px;
-                opacity: 1;
-                padding-top: 1rem;
-                padding-bottom: 1rem;
-            }
-            
-            #settings.hidden {
-                display: none;
-            }
-            
-            #settingsIcon {
-                transition: transform 0.4s ease-in-out;
-            }
-            
-            /* Ensure settings container doesn't affect layout */
-            #settingsContainer {
-                position: fixed;
-                top: 1rem;
-                left: 1rem;
-            }
+                /* Settings panel (inline, placed below Tasks) */
+                #settings {
+                    max-height: 0;
+                    opacity: 0;
+                    overflow: hidden;
+                    padding-top: 0;
+                    padding-bottom: 0;
+                    transition: max-height 0.4s ease-in-out, opacity 0.4s ease-in-out, padding 0.4s ease-in-out;
+                }
+
+                #settings.show {
+                    max-height: 500px;
+                    opacity: 1;
+                    padding-top: 1rem;
+                    padding-bottom: 1rem;
+                }
+
+                #settings.hidden {
+                    display: none;
+                }
+
+                #settingsIcon {
+                    transition: transform 0.4s ease-in-out;
+                }
+
+                /* Settings container will flow in document (not fixed) */
+                #settingsContainer {
+                    position: relative;
+                    margin-top: 1rem;
+                }
+          
         </style>
         <title>Welcome to Prioriti</title>
 </head>
 <body class=" bg-[#fadfc0] p-10">
-    <!-- =============================================================== -->
-    <!--                         SETTINGS PANEL                         -->
-    <!-- =============================================================== -->
-    <div id="settingsContainer" class="fixed top-4 left-4 w-64" style="z-index: 9999;">
-        <button id="settingsToggle" class="w-full flex justify-between items-center p-3 gap-2 rounded-lg shadow-md hover:bg-amber-50 transition-colors ease-in-out">
-            <span class="font-semibold text-amber-950">Settings</span>
-            <i id="settingsIcon" class="fa-solid fa-chevron-down transition-transform duration-300"></i>
-        </button>
-        <div id="settings" class="absolute top-full left-0 mt-2 w-full bg-white rounded-lg shadow-md hidden" style="z-index: 9999;">
-            <!-- Enter custom times for pomomdoro timer -->
-            <div class="w-full p-4">
-                <div class="grid grid-cols-2 gap-2 items-center">
-                    <label for="workInput" class="text-right pr-2">Work duration:</label>
-                    <input id="workInput" class="w-20 text-center border rounded" 
-                        type="number" value="{{ settings.work }}">
-                    <label for="smallBreakInput" class="text-right pr-2">Small break duration:</label>
-                    <input id="smallBreakInput" class="w-20 text-center border rounded no-spin" type="number" value="{{ settings.small_break }}">
-
-                    <label for="longBreakInput" class="text-right pr-2">Long break duration:</label>
-                    <input id="longBreakInput" class="w-20 text-center border rounded no-spin" type="number" value="{{ settings.long_break }}">
-                </div>
-
-                <div class="flex flex-col gap-2 mt-4">
-                    <button id="setCustomDurationsBtn" class="p-2 text-white bg-amber-950 hover:bg-amber-800 transition-colors ease-in-out text-md rounded">Set</button>
-                    <button id="resetDefault" class="p-2 text-white bg-amber-950 hover:bg-amber-800 transition-colors ease-in-out text-md rounded">Reset</button>
-                </div>
-            </div>
-        </div>
-    </div>
+ 
     <div class="flex flex-col gap-3 justify-center items-center">
     <h1 class="text-4xl font-semibold dm-serif">Welcome to Prioriti!</h1>
     <p class="text-xl font-light font-sans">Your task management solution.</p>
@@ -106,18 +79,48 @@
     </div>
     <h1 id="stateLabel"></h1>
     
-     <!--- Button Row -->
-    <div class="flex gap-2"> 
+    <!--- Button Row -->
+    <div class="flex gap-2 justify-center items-center"> 
         <button id="toggleBtn" class="p-2 hover:text-amber-800 transition-colors ease-in-out text-black text-2xl rounded"> <i id="toggleIcon" class="fa-solid fa-play"></i></button>
 
         <button id="resetBtn" class="p-2  text-black hover:text-amber-800 transition-colors ease-in-out text-2xl rounded"> <i class="fa-solid fa-rotate-right"></i></button>
     </div>
     </div>
 
+       <!-- =============================================================== -->
+    <!--                         SETTINGS PANEL                         -->
+    <!-- =============================================================== -->
+    <div id="settingsContainer" class="mt-6 mx-auto w-full max-w-xl">
+        <button id="settingsToggle" class="w-full flex justify-between items-center p-3 gap-2 rounded-lg shadow-md hover:bg-amber-50 transition-colors ease-in-out">
+            <span class="font-semibold text-amber-950">Settings</span>
+            <i id="settingsIcon" class="fa-solid fa-chevron-down transition-transform duration-300"></i>
+        </button>
+        <div id="settings" class="absolute z-50 bg-[#fadfc0] mt-2 w-full rounded-lg shadow-md hidden" >
+            <!-- Enter custom times for pomomdoro timer -->
+            <div class="w-full p-4">
+                <div class="grid grid-cols-2 gap-2 items-center">
+                    <label for="workInput" class="text-right pr-2">Work duration:</label>
+                    <input id="workInput" class="w-20 text-center border rounded" 
+                        type="number" value="{{ settings.work }}">
+                    <label for="smallBreakInput" class="text-right pr-2">Small break duration:</label>
+                    <input id="smallBreakInput" class="w-20 text-center border rounded no-spin" type="number" value="{{ settings.small_break }}">
+
+                    <label for="longBreakInput" class="text-right pr-2">Long break duration:</label>
+                    <input id="longBreakInput" class="w-20 text-center border rounded no-spin" type="number" value="{{ settings.long_break }}">
+                </div>
+
+                <div class="flex flex-row gap-2 mt-4 w-28 justify-center items-center mx-auto ">
+                    <button id="setCustomDurationsBtn" class="w-full px-4 py-2 text-base font-semibold text-white bg-amber-950 hover:bg-amber-800 transition-colors ease-in-out rounded-full">Set</button>
+                    <button id="resetDefault" class="w-full px-4 py-2 text-base font-semibold text-white bg-amber-950 hover:bg-amber-800 transition-colors ease-in-out rounded-full">Reset</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- =============================================================== -->
     <!--                       TASK MANAGEMENT UI                        -->
     <!-- =============================================================== -->
-    <div class="mt-10 mx-auto bg-white shadow-lg p-6 rounded-lg w-full max-w-xl">
+    <div class="mt-10 mx-auto shadow-lg p-6 rounded-lg w-full max-w-xl">
 
         <h2 class="text-3xl font-bold dm-serif text-amber-950 mb-4">Your Tasks</h2>
 
@@ -135,30 +138,139 @@
                 </select>
 
                 <input id="dueDate" type="date" class="border p-2 rounded w-1/2">
-            </div>
-
-            <button id="addTaskBtn"
-                    style="background-color:#b45309; color:white; padding:8px 16px; border:2px solid #7c2d12; border-radius:6px; width:100%; font-weight:bold;">
+                  <button id="addTaskBtn"
+                    class="bg-amber-950 hover:bg-amber-800 transition-colors ease-in-out text-white p-2 rounded w-full font-bold">
                     Add Task
             </button>
+            </div>
+
+          
         </div>
 
         <!-- SORTING -->
-        <button id="sortPriorityBtn"
-                style="background-color:#f59e0b; color:white; padding:8px 16px; border-radius:6px; width:100%; font-weight:bold;">
-            Sort by Priority
-        </button>
-
+        <div class="flex w-full gap-2 justify-start items-center">
+       
+            <button id="sortPriorityBtn"
+                    class="bg-amber-950 hover:bg-amber-800 transition-colors ease-in-out text-white text-sm px-4 py-2 font-bold rounded-full">
+                High to Low
+            </button>
+            <button id="sortDueDateBtn"
+                    class="bg-amber-950 hover:bg-amber-800 transition-colors ease-in-out text-white text-sm px-4 py-2 font-bold rounded-full">
+                Upcoming
+            </button>
+            <button id="highPriority"
+                    class="bg-red-900 hover:bg-amber-600 transition-colors ease-in-out text-white text-sm px-4 py-2 font-bold rounded-full">
+                High
+            </button>
+            <button id="mediumPriority"
+                    class="bg-yellow-700 hover:bg-yellow-600 transition-colors ease-in-out text-white text-sm px-4 py-2 font-bold rounded-full">
+                Medium
+            </button>
+            <button id="lowPriority"
+                    class="bg-green-950 hover:bg-green-800  transition-colors ease-in-out text-white text-sm px-4 py-2 font-bold rounded-full">
+                Low
+            </button>
+            <button id="allTasks"
+                    class="bg-pink-600 hover:bg-pink-800  transition-colors ease-in-out text-white text-sm px-4 py-2 font-bold rounded-full">
+                All
+            </button>
+    </div> 
         <!-- TASK LIST -->
-        <ul id="taskList" class="space-y-2"></ul>
+        <div class="flex justify-start items-center mt-4 w-full">
+         <ul id="taskList" class="space-y-2 w-full"></ul>
+        </div>
+    
+    
+    <div id="ytPlayer"></div>
+    <div id="rainSoundsPlayer"></div>
+    <span class="text-2xl font-semibold dm-serif mt-6">Background Sounds</span>
+    <div class="flex gap-4 justify-center items-center mt-2">
+        <button id="lofiToggle" class="p-2 rounded hover:text-amber-800 transition-colors ease-in-out flex items-center gap-2">
+            <i class="fa-solid fa-play"></i>
+            <span>Lofi</span>
+        </button>
+        <button id="rainToggle" class="p-2 rounded hover:text-amber-800 transition-colors ease-in-out flex items-center gap-2">
+            <i class="fa-solid fa-play"></i>
+            <span>Rain</span>
+        </button>
     </div>
-   
+
+    
+
+     
 </body>
 
 
 <!-- =============================================================== -->
 <!--                         JAVASCRIPT LOGIC                         -->
 <!-- =============================================================== -->
+
+<script src="https://www.youtube.com/iframe_api"></script>
+<script> 
+    let ytPlayer, rainPlayer;
+
+    function onYouTubeIframeAPIReady() {
+        ytPlayer = new YT.Player('ytPlayer', {
+            height: '0',
+            width: '0',
+            playerVars: {
+                listType: 'playlist',
+                list: "PLv1quoEqqgjAihdJtJZVKWtZWo_vD2y6U",
+                autoplay: 0,  
+                controls: 0,
+                modestbranding: 1,
+                loop: 1
+            }
+        });
+
+        rainPlayer = new YT.Player('rainSoundsPlayer', {
+            height: '0',
+            width: '0',
+            videoId: 'IUfA_J4eES0',
+            playerVars: {
+                autoplay: 0,
+                controls: 0,
+                modestbranding: 1,
+                loop: 1
+            }
+        });
+    }
+
+    const lofiBtn = document.getElementById("lofiToggle");
+    const rainBtn = document.getElementById("rainToggle");
+
+    lofiBtn.dataset.playing = "false";
+    rainBtn.dataset.playing = "false";
+
+    lofiBtn.addEventListener("click", () => {
+        if (!ytPlayer) return;
+
+        if (lofiBtn.dataset.playing === "true") {
+            ytPlayer.pauseVideo();
+            lofiBtn.innerHTML = '<i class="fa-solid fa-play"></i> <span>Lofi</span>';
+            lofiBtn.dataset.playing = "false";
+        } else {
+            ytPlayer.playVideo();
+            lofiBtn.innerHTML = '<i class="fa-solid fa-pause"></i> <span>Lofi</span>';
+            lofiBtn.dataset.playing = "true";
+        }
+    });
+
+   rainBtn.addEventListener("click", () => {
+    if (!rainPlayer) return;
+
+    if (rainBtn.dataset.playing === "true") {
+        rainPlayer.pauseVideo();
+        rainBtn.innerHTML = '<i class="fa-solid fa-play"></i> <span>Rain</span>';
+        rainBtn.dataset.playing = "false";
+    } else {
+        rainPlayer.playVideo();
+        rainBtn.innerHTML = '<i class="fa-solid fa-pause"></i> <span>Rain</span>';
+        rainBtn.dataset.playing = "true";
+    }
+});
+
+</script>
 <script>
 
     const minInput = document.getElementById("minutesInput");
@@ -272,7 +384,7 @@
     /* ------------------------------------------------------------ */
     /*                        TASK LIST LOGIC                       */
     /* ------------------------------------------------------------ */
-    async function loadTasks() {
+    async function loadTasks(filter=null) {
             const res = await fetch("/tasks");
             const data = await res.json();
 
@@ -280,6 +392,7 @@
             list.innerHTML = "";
 
             data.tasks.forEach(t => {
+                if (filter && t.priority !== filter) return;
                 const li = document.createElement("li");
 
                 const bgColor = t.completed
@@ -369,6 +482,27 @@
         /* Sort Tasks by Priority */
         document.getElementById("sortPriorityBtn").addEventListener("click", async () => {
             await fetch("/sort_priority");
+            loadTasks();
+        });
+        /* Sort Tasks by Due Date */
+        document.getElementById("sortDueDateBtn").addEventListener("click", async () => {
+            await fetch("/sort_due_date");
+            loadTasks();
+        });
+
+        /* Filter Tasks by Priority */
+        document.getElementById("highPriority").addEventListener("click", async () => {
+            loadTasks(filter="High");
+        });
+
+        document.getElementById("mediumPriority").addEventListener("click", async () => {
+            loadTasks(filter="Medium");
+        });
+
+        document.getElementById("lowPriority").addEventListener("click", async () => {
+            loadTasks(filter="Low");
+        });
+         document.getElementById("allTasks").addEventListener("click", async () => {
             loadTasks();
         });
 
