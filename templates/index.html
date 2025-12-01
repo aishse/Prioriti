@@ -300,7 +300,14 @@
         toggleIcon.className = data.running ? "fa-solid fa-pause" : "fa-solid fa-play";
     }
 
+    async function fetchDB() {
+        const res = await fetch('/reload_tasks');
+        const data = await res.json();
+        console.log("Task DB reloaded:", data);
+        
+    }
     fetchState();
+    fetchDB();
     setInterval(fetchState, 1000);
 
     toggleBtn.addEventListener("click", async() => {
