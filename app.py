@@ -9,7 +9,15 @@ from sqlalchemy.orm import sessionmaker
 
 import signal
 import sys
-import time
+if due_str:
+    # try parsing ISO date `YYYY-MM-DD`
+    try:
+        due_date = _date.fromisoformat(due_str)
+    except Exception:
+        try:
+            due_date = _datetime.fromisoformat(due_str).date()
+        except Exception:
+            due_date = None
 app = Flask(__name__)
 timer = PomodoroTimer()
 
@@ -225,4 +233,3 @@ if __name__ == '__main__':
     finally:
         # Ensure timer is stopped
         timer.stop()
-
